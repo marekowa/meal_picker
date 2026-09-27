@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,6 +24,17 @@ h1 {
     gap: 30px;
     padding: 20px;
     flex-wrap: wrap;
+}
+
+#additional_options {
+    display: flex;
+    justify-content: left;
+    gap: 30px;
+    padding: 20px;
+    flex-wrap: wrap;
+}
+.card button {
+    padding: 5px;
 }
 
 .card {
@@ -72,11 +83,20 @@ h1 {
     <div class="card" onclick="vote('left')">
         <img id="img1">
         <h2 id="name1"></h2>
+        <div class="additional_options">
+            <button onclick="stash('left')">
+            🐹 Zachomikuj
+            </button>
+        </div>
+
     </div>
 
     <div class="card" onclick="vote('right')">
         <img id="img2">
         <h2 id="name2"></h2>
+        <button onclick="stash('left')">
+        🐹 Zachomikuj
+        </button>
     </div>
 </div>
 
@@ -100,9 +120,6 @@ const foods = [
 "burrito",
 "hot dog",
 "croissant",
-"cheesecake",
-"ice cream",
-"donut",
 "mac and cheese",
 "gyros",
 "bibimbap",
@@ -111,21 +128,14 @@ const foods = [
 "paella",
 "falafel",
 "butter chicken",
-"naan",
 "curry",
 "brisket",
 "wings",
 "nachos",
 "carbonara",
 "risotto",
-"pancakes",
-"waffles",
-"churros",
-"mochi",
-"dubai chocolate",
 "birria taco",
 "hot honey pizza",
-"cookies",
 "bagel",
 "boba tea",
 "cucumber salad",
@@ -133,13 +143,15 @@ const foods = [
 "bao buns",
 "korean corn dog",
 "acai bowl",
-"gelato",
-"tiramisu"
 ];
 
 let champion = foods[0];
 let challengerIndex = 1;
+let championImage = "";
+let savedFoods = [];
+
 const UNSPLASH_KEY = "eKifVGQ608YFLiQwPTHBZM4Ctnx1WpEk2A7dg9IZ2sk";
+const NUM_ROUNDS = 10;
 
 async function getImage(food) {
     const response = await fetch(
@@ -157,25 +169,52 @@ async function getImage(food) {
 
 async function render() {
 
-    if (challengerIndex >= foods.length) {
+    if (challengerIndex >= foods.length || challengerIndex >= NUM_ROUNDS) {
         document.getElementById("battle").style.display = "none";
 
         document.getElementById("winner").innerHTML =
-            `🏆 Champion:<br><br>${champion}`;
+            `     <h2>🏆 Champion: ${champion} </h2>
+            <img src="${championImage}"
+                style="width:400px;border-radius:12px;">`;
 
         return;
     }
 
     document.getElementById("name1").textContent = champion;
     document.getElementById("name2").textContent = foods[challengerIndex];
+    
+    const imgChampion = await getImage(champion);
+    const imgChallenger = await getImage(foods[challengerIndex]);
 
-    document.getElementById("img1").src = await getImage(champion);
-    document.getElementById("img2").src = await getImage(foods[challengerIndex]);
+    document.getElementById("img1").src = imgChampion;
+    document.getElementById("img2").src = imgChallenger;
+
+    championImage = imgChampion;
 
     document.getElementById("progress").textContent =
-        `Round ${challengerIndex}/${foods.length - 1}`;
+        `Round ${challengerIndex}/${NUM_ROUNDS}`;
 }
 
+
+function stash(side) {
+
+    const food =
+        side === "left"
+        ? champion
+        : foods[challengerIndex];
+
+    const image =
+        side === "left"
+        ? document.getElementById("img1").src
+        : document.getElementById("img2").src;
+
+    savedFoods.push({
+        name: food,
+        image: image
+    });
+
+    alert(`${food} zachomikowane 🐹`);
+}
 
 function vote(side) {
 
@@ -191,5 +230,6 @@ render();
 
 </script>
 
+<div id="saved"></div>
 </body>
 </html>
